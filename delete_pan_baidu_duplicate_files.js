@@ -14,11 +14,12 @@
 
     // Your code here...
     //var testurl="/我的文档/嘉nian华/更多精彩关注微信公众号：哎生活vs爱生活.mkv";
+    var bdstoken="xxx";
 
     setTimeout(function() {
 
         var testimonials = $(".choosen  a");
-        var bdstoken="xxx";
+
         for (var i = 0; i < testimonials.length; i++) {
 
             if (i % 2 == 1) continue;
