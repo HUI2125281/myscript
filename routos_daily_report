@@ -1,0 +1,48 @@
+{#上网接口名称
+
+:local PPPInterface "ros_pppoe";
+
+#设备名称
+
+:local whoami "Hi,";
+
+#发送Email的主题
+
+:local Themes "ROS Email Assistant";
+
+#发送内容
+
+:local Contents "IP Address: ";
+
+:local SendEmailTo "xxx@gmail.com";
+
+#获取接口IP地址
+
+:local getip [ /ip address get [/ip address find interface=$PPPInterface ] address ];
+
+:global IPAddress [:pick $getip 0 [:find $getip "/" ] ];
+
+#获取system版本
+
+:global ROSVersion ("\nRouterOS Version: v" . [/system package get [/system package find name=routeros] version]  );
+
+:global ROSResource ("\nRouterOS Resource:  ");
+
+:local getres [/system resource get];
+
+:foreach k,v in=$getres do={
+    :if ([:find "cpu-load|uptime|version" $k]>=0) do {
+    :set ROSResource  ($ROSResource . " $k=$v \n")
+    };
+}
+
+#发送Email设置
+
+/tool e-mail send to=$SendEmailTo subject=$Themes body=("$whoami\n$Contents$IPAddress\n$ROSVersion \n $ROSResource  ");
+
+#日志提醒
+
+:log warning "统计邮件已发送至($SendEmailTo)";
+
+:log warning ("外网IP =" ."$IPAddress");}
+
