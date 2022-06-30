@@ -1,0 +1,89 @@
+set daemon  120                             # 设置monit作为守护进程运行，并且每2分钟监视一次
+                                            # 2分钟是默认的时间间隔，从网上的看到的多个配置的例子
+                                            # 看到的时间间隔也是2分钟，应该是比较合理的
+set logfile /var/log/monit.log              # 设置日志文件的位置，如果要写入系统日志可以
+                                            # set logfile syslog
+set httpd port 28121 and                     # monit内置了一个用于查看被监视服务
+                                            # 状态的http服务器,注意在防火墙中开启
+                                            # 该端口【1】,否则非localhost无法访问
+     allow localhost                        # 允许本地访问
+     allow admin:admin       # 设置使用用户名admin和密码monit11
+#set mailserver  localhost                   # 设置邮件服务,设置后monit会将提示以
+                                            # 邮件的方式发送.这里使用localhost为邮
+                                            # 件服务器地址,前提是本地已安装并开启
+                                            # 了sendmail服务
+#set alert abc@qq.com            # 收邮件地址,如果要发送到多个地址
+                                            # 可以写多条这样的设置
+set mailserver smtp.ym.163.com port 994
+    username "xxx.com" password "yyy"
+    using ssl
+    with timeout 30 seconds
+
+set mail-format {
+      from: monit <monit@xxx.com>
+   subject: $HOST $SERVICE $EVENT at $DATE
+   message: Monit $ACTION $SERVICE at $DATE on $HOST:
+            $DESCRIPTION.
+            Yours sincerely,
+            monit
+}
+
+set alert xxx@qq.com #but not on { instance, nonexist }
+
+
+check system $HOST
+    if cpu usage (user) > 95% for 10 cycles then alert
+    if loadavg(5min) > 2  then alert
+    if memory usage > 85% for 5 cycles then alert
+    group server
+
+check filesystem disk_space with path /dev/vda1
+    if space usage > 85% for 5 times within 15 cycles
+       then alert else if passed for 10 cycles then alert
+    group server
+
+
+check process nginx with pidfile /usr/local/nginx/logs/nginx.pid
+    start program = "/usr/bin/lnmp nginx start" with timeout 60 seconds
+    stop program  = "/usr/bin/lnmp nginx stop"
+#    if failed host 127.0.0.1 port 443 protocol http for 3 cycles then restar
+    if changed pid then restart
+
+check process mysql with pidfile /usr/local/mysql/var/txhk.pid
+    start program = "/usr/bin/lnmp mysql start" with timeout 60 seconds
+    stop program  = "/usr/bin/lnmp mysql stop"
+    if failed unixsocket /tmp/mysql.sock then restart
+
+
+check process php-fpm with pidfile /usr/local/php/var/run/php-fpm.pid
+  group phpcgi #change accordingly
+  start program = "/usr/bin/lnmp php-fpm start"
+  stop program  = "//usr/bin/lnmp php-fpm stop"
+  if failed unixsocket /tmp/php-cgi.sock then restart
+  if 3 restarts within 5 cycles then timeout
+
+
+check host xigua with address txhk.coolxigua.com
+ start program = "/usr/bin/lnmp start"
+ stop program = "/usr/bin/lnmp stop"
+   if failed url https://www.abc.com/abc.php
+      and content = "1024" and timeout 2 seconds
+   then restart
+
+
+check process memcached with pidfile /run/memcached.pid
+    start program = "/etc/init.d/memcached start"
+    stop program = "/etc/init.d/memcached stop"
+    if failed host 127.0.0.1 port 11211 then restart
+
+
+check program v2ray with path "/usr/bin/systemctl status v2ray"
+        start program = "/usr/bin/systemctl start v2ray"
+        stop program = "/usr/bin/systemctl stop v2ray"
+        if status != 0 then restart
+        if 3 restarts within 5 cycles then alert
+
+check host spartanhost with address billing.spartanhost.net
+   if failed url https://billing.spartanhost.net/cart.php?a=add&pid=169
+      and content = "Out of Stock" and timeout 2 seconds
+   then alert
