@@ -1,15 +1,14 @@
-Sub Picture()
+Sub add_Picture()
     Dim picname As String
-    Dim shp As Shape
     Dim pasteAt As Integer
     Dim lThisRow As Long
     lThisRow = 2 'This is the start row
-    Do While(Cells(lThisRow, 4) <> "")
+    Do While(Cells(lThisRow, 4) <> "") ' 4,本地文件名相关列
         pasteAt = lThisRow
         picname = Cells(lThisRow, 4) 'This is the picture name
         present = Dir("D:\workspaces\mailipy-master\qrimg\" & picname & "_qr.png")
-        Cells(pasteAt, 7) = "D:\workspaces\mailipy-master\qrimg\" & picname & "_qr.png"
         If present <> "" Then
+            Cells(pasteAt, 7) = "D:\workspaces\mailipy-master\qrimg\" & picname & "_qr.png" '这一列放生成的文件名，做参考
             Set Rng = Cells(pasteAt, 6)
             Set sShape = ActiveSheet.Shapes.AddPicture("D:\workspaces\mailipy-master\qrimg\" & picname & "_qr.png", msoFalse, msoCTrue, Rng.Left, Rng.Top, Rng.Width, Rng.Height)
         Else
