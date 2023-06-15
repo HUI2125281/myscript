@@ -16,15 +16,15 @@ from email.mime.multipart import MIMEMultipart
 
 # 配置信息
 imap_server = 'imap.qq.com'
-imap_username = '@qq.com'
+imap_username = '123@qq.com'
 imap_password = ''
 # smtp
-smtp_server = ''  # smtp服务器地址
-smtp_user = ''  # 邮件转发目标地址
+smtp_server = '.fsg.com'  # smtp服务器地址
+smtp_user = '.@fsg.com'  # 邮件转发目标地址
 smtp_pass = ''  # 邮件转发目标地址
 # mail info
-reply_to = '@.com.cn'  # 邮件回复地址
-sender_name = ""  # 发件人姓名
+reply_to = 'discussion@fsg.com'  # 邮件回复地址
+sender_name = "discussion"  # 发件人姓名
 # 设置群发列表
 bcc_addr = ""
 # 已经转发的邮件message-ID记录文件，根据您的实际情况进行修改
@@ -53,8 +53,8 @@ def log_email_list(e):
     e = str(e).lower()
 
     emails = read_email_list()
-    # 只允许fsg.com.cn的邮件加入
-    if re.search(r"\b[A-Z0-9._%+-]+@fsg.com.cn", e, re.IGNORECASE):
+    # 只允许fsg.com的邮件加入
+    if re.search(r"\b[A-Z0-9._%+-]+@fsg.com", e, re.IGNORECASE):
         emails.add(e)
     emails.discard(str(smtp_user))
     with open(EMAIL_FILE, 'wb') as f:
@@ -185,7 +185,16 @@ def check_new_emails():
     imap_obj.logout()
 
 
-help_msg = '''<p>有''' + str(len(read_email_list())) + '''人加入。</p>'''
+help_msg = '''<p>您有问题可以发送邮件到discussion@fsg.com。所有加入的小伙伴都会收到你的邮件。同样回复给邮箱discussion@fsg.com的时候，所有加入的小伙伴也都会收到这个邮件。 </p>
+<p>目前希望您讨论的话题是信息化系统，速创、聚合力，云平台等，也可以是RPA，数字化工具、平台等。 </p>
+<p>请提问的时候注意邮件的格式，如果你想尽快得到答案，标题请概述问题，问题请尽量描述清楚，然后耐心等待小伙伴们的回复。也希望你收你能解决问题的邮件时，能热心的帮助其他小伙伴。</p>
+<p>邮件内容请不要有敏感信息。</p>
+<p>如果加入请发邮件到discussion@fsg.com,邮件标题为：subscribe<br/>
+如果退出请发邮件到discussion@fsg.com,邮件标题为：unsubscribe<br/>
+如果需要帮助请发邮件到discussion@fsg.com,邮件标题为：helpme<br/>
+正常分享或者求助，不要用上述邮件标题。正常发送邮件即可。（标题写问题概述，邮件正文描述清楚问题或者分享的内容。收件人一定是discussion@fsg.com<br/>
+</p><p>试运行期间，有问题请联系hui.ju@fsg.com。仅支持fsg.com的邮箱加入</p>
+<p>目前共有''' + str(len(read_email_list())) + '''人加入。</p>'''
 
 
 def send_help(from_mail):
@@ -207,6 +216,7 @@ def send_bye(from_mail):
     # 设置文本内容
     html = '''<html><body><p>您好''' + from_mail.split("@")[0] + '''：</p>
 <p> 感谢你参与discussion邮件讨论组。</p>
+<p>再见，有问题请联系hui.ju@fsg.com</p>
 <p>目前共有''' + str(len(read_email_list())) + '''人加入。</p></body></html>'''
     msg.attach(MIMEText(html, 'html'))
     # 设置邮件主题、发件人、收件人信息
@@ -256,7 +266,7 @@ def forward_email(email_msg):
     email_msg['Cc'] = msg_from
     email_msg['Bcc'] = bcc_addr
 
-    # email_msg.replace_header("Message-Id", "<%s@fsg.com.cn>" % (
+    # email_msg.replace_header("Message-Id", "<%s@fsg.com>" % (
     #         str(int(datetime.datetime.timestamp(datetime.datetime.now()))) + str(random.random())))
     print("bcc:" + bcc_addr)
     # print_email(email_msg)
@@ -269,7 +279,7 @@ def send_mail(email_msg):
     email_msg['From'] = '{} <{}>'.format(sender_name, smtp_user)
     email_msg['Reply-To'] = reply_to
     email_msg['Date'] = email.utils.formatdate()
-    email_msg['Message-Id'] = "<%s@fsg.com.cn>" % (
+    email_msg['Message-Id'] = "<%s@fsg.com>" % (
             str(int(datetime.datetime.timestamp(datetime.datetime.now()))) + str(random.random()))
 
     # print(email_msg)
